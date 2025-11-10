@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Resolve ManagedDirectory: always prefer repo root Managed folder for tests -->
+    <_RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../../'))</_RepoRoot>
+    <_ManagedDirCandidate>$([System.IO.Path]::Combine('$(_RepoRoot)','Managed'))</_ManagedDirCandidate>
+    <ManagedDirectory Condition="Exists('$(_ManagedDirCandidate)')">$(_ManagedDirCandidate)/</ManagedDirectory>
+    
+    <!-- Only use game directory if SteamDir is set and Managed folder doesn't exist -->
+    <DuckovPath Condition="'$(SteamDir)' != '' AND '$(ManagedDirectory)' == ''">$(SteamDir)steamapps/common/Escape from Duckov/</DuckovPath>
+    <ManagedDirectory Condition="'$(ManagedDirectory)' == '' AND '$(DuckovPath)' != ''">$(DuckovPath)Duckov_Data/Managed/</ManagedDirectory>
+    <ModsDirectory Condition="'$(DuckovPath)' != ''">$(DuckovPath)Duckov_Data/Mods/</ModsDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit.Analyzers" />
+    <PackageReference Include="NUnit3TestAdapter" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\SDKlibs\Ducky.Sdk.Lib\Ducky.Sdk.Lib.csproj" />
+  </ItemGroup>
+
+  <!-- Only add references if ManagedDirectory exists -->
+  <ItemGroup Condition="'$(ManagedDirectory)' != '' AND Exists('$(ManagedDirectory)')">
+    <Reference Include="$(ManagedDirectory)TeamSoda.*" />
+    <Reference Include="$(ManagedDirectory)Unity*" />
+    <Reference Include="$(ManagedDirectory)FOW*" />
+    <Reference Include="$(ManagedDirectory)SodaLocalization*" />
+    <Reference Include="$(ManagedDirectory)ItemStatsSystem.dll" />
+    <Reference Include="$(ManagedDirectory)Newtonsoft.Json.dll" />
+    <Reference Include="$(ManagedDirectory)EasySave3.dll" />
+  </ItemGroup>
+
+  <!-- Warn if ManagedDirectory is not available -->
+  <Target Name="WarnMissingManagedDirectory" BeforeTargets="BeforeBuild" Condition="'$(ManagedDirectory)' == '' OR !Exists('$(ManagedDirectory)')">
+    <Warning Text="ManagedDirectory not found. Game assembly references will be skipped. Run fetch_build_dependency.sh to download them." />
+  </Target>
+
+</Project>
