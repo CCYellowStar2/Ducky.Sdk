@@ -80,7 +80,7 @@ jobs:
           path: ./artifacts/*.nupkg
           retention-days: 30
 
-      - name: Run push to nuget if it is a tag
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Push to NuGet (tags and main branch)
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         run: |
           dotnet nuget push ./artifacts/*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate
