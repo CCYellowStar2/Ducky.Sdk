@@ -37,9 +37,15 @@
   </Target>
 
   <!-- Add Harmony reference and dependencies when IncludeHarmony is true -->
-  <ItemGroup Condition=" '$(IncludeHarmony)' == 'true' ">
+  <ItemGroup Condition=" '$(IncludeHarmony)' == 'true' AND '$(ManagePackageVersionsCentrally)' != 'true' ">
     <PackageReference Include="Mono.Cecil" Version="0.11.6" />
     <PackageReference Include="MonoMod.Utils" Version="25.0.11" />
+  </ItemGroup>
+
+  <!-- Add Harmony dependencies without version when using Central Package Management -->
+  <ItemGroup Condition=" '$(IncludeHarmony)' == 'true' AND '$(ManagePackageVersionsCentrally)' == 'true' ">
+    <PackageReference Include="Mono.Cecil" />
+    <PackageReference Include="MonoMod.Utils" />
   </ItemGroup>
 
   <Target Name="AddHarmonyReference" BeforeTargets="BeforeResolveReferences"
